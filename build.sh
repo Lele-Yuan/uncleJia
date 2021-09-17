@@ -5,12 +5,12 @@ set -e
 pushMaster() {
     # 提交到本地仓库
     git add -A
-    read -p "请输入本次commit message：" commitMessage
+    read -p $"请输入本次commit message：" commitMessage
     echo '$commitMessage'
     git commit -m ${commitMessage}
 
     echo 'begin push to master'
-    git push origin master
+    git push -u origin master
     echo 'has pushed to master'
 
 }
@@ -25,11 +25,12 @@ publishPages() {
     # 提交到本地仓库
     git init
     git add -A
+    git commit -m 'republish pages'
 
     # 提交到 https://github.com/Lele-Yuan/uncleJia.git 项目的 main 分支
     # main 分支作为 gitHub pages 的部署分支
     echo 'push to main and publish pages'
-    git push -f https://github.com/Lele-Yuan/uncleJia.git master:main
+    git push https://github.com/Lele-Yuan/uncleJia.git master:main
     echo 'has pushed to main'
 
     cd -
