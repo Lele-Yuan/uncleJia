@@ -5,10 +5,9 @@ set -e
 pushMaster() {
     # 提交到本地仓库
     git add -A
-    echo $"请输入本次commit message 并以 / 结束："
-    read -d '/' commitMessage
-    echo '$commitMessage'
-    git commit -m ${commitMessage}
+    read -p "请输入本次commit message 并以 / 结束：" -d '/' commitMessage
+    echo $commitMessage
+    git commit -m '${commitMessage}'
 
     echo 'begin push to master'
     git push -u origin master
@@ -61,5 +60,5 @@ else
     echo "Input Error"
 fi
 
-# read -d '/' array_test
-# echo $array_test
+# read -p "请输入本次commit message 并以 / 结束：" -d '/' commitMessage
+# echo $commitMessage
