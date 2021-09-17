@@ -21,19 +21,20 @@ read -p "是否要提交到master？yes/no" checkMaster
 
 if [[ $checkMaster = 'yes' ]]; 
 then
-    git add .
-    git commit -m $commitMessage
+    echo 'begin push to master'
     git push origin master
     echo 'has pushed to master'
 elif [[ $checkMaster = 'no' ]];
 then
-    echo 'ignore master commit'
+    echo 'ignore push to master'
 else
   echo "Input Error"
 fi
 
 # 提交到 https://github.com/Lele-Yuan/uncleJia.git 项目的 main 分支
 # main 分支作为 gitHub pages 的部署分支
+echo 'push to main and publish pages'
 git push -f https://github.com/Lele-Yuan/uncleJia.git master:main
+echo 'has pushed to main'
 
 cd -
