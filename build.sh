@@ -2,39 +2,59 @@
 # 错误时停止
 set -e
 
-# # 打包
-# npm run build
+pushMaster() {
+    # 提交到本地仓库
+    git add -A
+    read -p "请输入本次commit message：" commitMessage
+    echo '$commitMessage'
+    git commit -m ${commitMessage}
 
-# # 进入目标文件夹
-# cd dist
-
-# 提交到本地仓库
-
-git init
-git add -A
-
-read -p "请输入本次commit message：" commitMessage
-git commit -m ${commitMessage}
-
-
-read -p "是否要提交到master？yes/no" checkMaster
-
-if [[ $checkMaster = 'yes' ]]; 
-then
     echo 'begin push to master'
     git push origin master
     echo 'has pushed to master'
-elif [[ $checkMaster = 'no' ]];
+
+}
+
+publishPages() {
+    # 打包
+    npm run build
+
+    # 进入目标文件夹
+    cd dist
+
+    # 提交到本地仓库
+    git init
+    git add -A
+
+    # 提交到 https://github.com/Lele-Yuan/uncleJia.git 项目的 main 分支
+    # main 分支作为 gitHub pages 的部署分支
+    echo 'push to main and publish pages'
+    git push -f https://github.com/Lele-Yuan/uncleJia.git master:main
+    echo 'has pushed to main'
+
+    cd -
+}
+
+echo '请选择本次操作：'
+select actionType in '提交' '发布' '提交并发布' ; 
+do
+    break;
+done
+echo $actionType
+
+if [[ $actionType = '提交' ]]; 
 then
-    echo 'ignore push to master'
+    echo 'pushMaster'
+    pushMaster
+elif [[ $actionType = '发布' ]];
+then
+    echo 'publishPage'
+    publishPages
+elif [[ $actionType = '提交并发布' ]];
+then
+    echo 'push and publish'
+    pushMaster
+    publishPages
 else
-  echo "Input Error"
+    echo "Input Error"
 fi
-
-# 提交到 https://github.com/Lele-Yuan/uncleJia.git 项目的 main 分支
-# main 分支作为 gitHub pages 的部署分支
-echo 'push to main and publish pages'
-git push -f https://github.com/Lele-Yuan/uncleJia.git master:main
-echo 'has pushed to main'
-
-cd -
