@@ -7,7 +7,7 @@ pushMaster() {
     git add -A
     read -p "请输入本次commit message 并以 / 结束：" -d '/' commitMessage
     echo $commitMessage
-    git commit -m '${commitMessage}'
+    git commit -m "$commitMessage"
 
     echo 'begin push to master'
     git push -u origin master
