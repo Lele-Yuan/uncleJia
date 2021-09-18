@@ -35,5 +35,12 @@ module.exports = {
         //         outputPath: ''
         //     })
         //     .end();
-    }
+    },
+    // 全局引入 less 变量文件 variate.less
+    pluginOptions: {
+        "style-resources-loader": {
+          preProcessor: "less",
+          patterns: [path.resolve(__dirname, "src/assets/styles/variate.less")]
+        }
+    },
 };
