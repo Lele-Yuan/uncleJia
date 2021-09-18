@@ -2,8 +2,8 @@
 # 错误时停止
 set -e
 
+# 提交到master分支
 pushMaster() {
-    # 提交到本地仓库
     git add -A
     read -p "请输入本次commit message 并以 / 结束：" -d '/' commitMessage
     echo $commitMessage
@@ -15,11 +15,10 @@ pushMaster() {
 
 }
 
+# 打包 提交main分支
 publishPages() {
     # 打包
     npm run build
-
-    # 进入目标文件夹
     cd dist
 
     # 提交到本地仓库
