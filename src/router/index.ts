@@ -4,12 +4,17 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Home',
-    component: import('../views/Home.vue')
+    component: () => import('views/Home.vue')
+  },
+  {
+    path: '/AutoComplete',
+    name: 'AutoComplete',
+    component: () => import('views/AutoComplete/Index.vue')
   },
   {
     path: '/excel',
     name: 'ExcelTable',
-    component: () => import(/* webpackChunkName: "ExcelTable" */ '../views/ExcelTable.vue')
+    component: () => import(/* webpackChunkName: "ExcelTable" */ 'views/ExcelTable.vue')
   },
   // {
   //   path: '/about',

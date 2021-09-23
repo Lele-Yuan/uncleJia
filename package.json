@@ -1,5 +1,5 @@
 {
-  "name": "vue3_ts_project",
+  "name": "uncleJia",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,8 +9,10 @@
   "dependencies": {
     "bi-vue-components": "^0.8.7",
     "core-js": "^3.6.5",
+    "element-plus": "^1.1.0-beta.15",
+    "flexsearch": "^0.6.30",
     "moment": "^2.29.1",
-    "vue": "^3.0.0",
+    "vue": "^3.2.12",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"
   },

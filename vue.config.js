@@ -22,6 +22,8 @@ module.exports = {
         // alias
         config.resolve.alias
             .set('@', resolve('src'))
+            .set('views', resolve('src/views'))
+            .set('mock', resolve('mock'))
             .end();
         // font files
         // const fontRule = config.module.rule('fonts');

@@ -1,6 +1,7 @@
 <template>
   <div id="nav">
     <router-link to="/">Home</router-link> |
+    <router-link to="/AutoComplete">AutoComplete</router-link> |
     <router-link to="/excel">ExcelTable</router-link>
   </div>
   <router-view/>
@@ -23,7 +24,7 @@
     color: #2c3e50;
 
     &.router-link-exact-active {
-      color: @font-orange-color;
+      color: @primary-pink-color;
     }
   }
 }
