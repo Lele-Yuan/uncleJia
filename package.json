@@ -10,7 +10,7 @@
     "bi-vue-components": "^0.8.7",
     "core-js": "^3.6.5",
     "element-plus": "^1.1.0-beta.15",
-    "flexsearch": "^0.6.30",
+    "flexsearch": "^0.7.21",
     "moment": "^2.29.1",
     "vue": "^3.2.12",
     "vue-router": "^4.0.0-0",

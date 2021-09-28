@@ -6,14 +6,14 @@
     </div>
     <div class="section example-01">
         <el-input class="el-input-inline" size="mini" v-model="flexsearchState.inputValue" @keyup="searchFlexsearch"></el-input>
-        <downshift v-if="flexsearchState.inputValue.trim()" :searchItems="flexsearchState.searchItems" :q="downshiftState.inputValue"></downshift>
+        <downshift v-if="flexsearchState.inputValue.trim()" :searchItems="flexsearchState.searchItems" :q="flexsearchState.inputValue"></downshift>
     </div>
 </div>
 </template>
 <script lang="ts" setup>
 import { reactive, Ref, ref } from '@vue/reactivity';
 import { dataList } from './autoComplete.js';
-import { filterQuery, flexsearchQuery } from './util.ts';
+import { filterQuery, flexsearchQuery, flexsearchQueryDocument } from './util.ts';
 import { searchItem } from './type'
 import downshift from './downshift.vue';
 
@@ -37,7 +37,7 @@ const searchDownshift = () => {
 }
 const searchFlexsearch = () => {
     console.time('searchFlexsearch');
-    flexsearchState.value.searchItems = flexsearchQuery(dataList, flexsearchState.value.inputValue);
+    flexsearchState.value.searchItems = flexsearchQueryDocument(dataList, flexsearchState.value.inputValue);
     console.timeEnd('searchFlexsearch');
 }
 

@@ -3,7 +3,7 @@
     <div class="search-results" v-if="props.searchItems.length > 0">
         <div class="search-option" v-for="item in props.searchItems" :key="item.title+item.url">
             <b v-html="HighlightMatch({title: item.title, q: props.q})"></b><br>
-            <small>{{ item.url }}</small>
+            <small v-html="HighlightMatch({title: item.url, q: props.q})"></small>
         </div>
     </div>
     <div class="search-empty" v-else>No Document Title Found.</div>
