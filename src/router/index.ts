@@ -14,7 +14,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/excel',
     name: 'ExcelTable',
-    component: () => import(/* webpackChunkName: "ExcelTable" */ 'views/ExcelTable.vue')
+    component: () => import(/* webpackChunkName: "ExcelTable" */ 'views/excelTable/Index.vue')
   },
   // {
   //   path: '/about',
