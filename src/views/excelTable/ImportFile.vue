@@ -77,7 +77,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, reactive, toRefs, computed, watch } from 'vue';
-import { readExcel, openDownloadDialog, sheet2blob, fileTypes } from './utils';
+import { readExcel, downloadDialog, fileTypes } from './utils';
 import { ObjectKeys, SheetJsonData } from './types';
 import XLSX from 'xlsx';
 
@@ -141,7 +141,7 @@ export default defineComponent({
     },
     methods: {
         downloadFile(){
-            openDownloadDialog(this.sheetJsonData)
+            downloadDialog(this.sheetJsonData)
         },
         uploadSuccess(params: { file: File }) {
             const file = params.file;

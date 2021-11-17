@@ -29,9 +29,12 @@ const props = defineProps({
 <style scoped lang="less">
 .downshift {
     position: absolute;
+    z-index: 100;
     top: 40px;
     border: 1px solid @border-color-black;
     padding: 10px;
+    line-height: 20px;
+    background: @background-org-color;
     .search-results{
         height: 325px;
         overflow-y: auto;

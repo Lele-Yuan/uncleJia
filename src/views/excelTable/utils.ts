@@ -74,7 +74,7 @@ export function sheet2blob(sheetDatas: SheetJsonData[]) {
  * @param url 下载地址，也可以是一个blob对象，必选
  * @param saveName 保存文件名，可选
  */
- export function openDownloadDialog(sheetDatas: SheetJsonData[], saveName: string = '导出.xlsx')
+ export function downloadDialog(sheetDatas: SheetJsonData[], saveName: string = '导出.xlsx')
  {
     let url: any = sheet2blob(sheetDatas);
     
