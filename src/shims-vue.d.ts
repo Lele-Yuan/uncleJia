@@ -4,3 +4,9 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+interface Window {
+  $message: any;
+  $loading: any;
+  showOpenFilePicker: any;
+  showSaveFilePicker: any;
+}

@@ -25,6 +25,17 @@ module.exports = {
             .set('views', resolve('src/views'))
             .set('mock', resolve('mock'))
             .end();
+        config.module
+            .rule('worker-loader')
+            .test(/\.worker\.js$/)
+            .use('worker-loader')
+            .loader('worker-loader')
+            .options({ 
+                inline: 'fallback',
+                filename: '[name].[contenthash].worker.js' 
+            })
+            .end()
+        config.output.globalObject('this');
         // font files
         // const fontRule = config.module.rule('fonts');
         // fontRule.uses.clear();

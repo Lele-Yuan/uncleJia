@@ -27,23 +27,14 @@ export default function(data) {
             if(factory){
 
                 // export the FlexSearch global payload to "self"
-                function workerFun() {
-                    self && (self.onmessage = (e) => {
-                        console.log(self.postMessage.toString());
-                        self.postMessage && self.postMessage(e.data, 'abcdef');
-                    })
-                }
-
-                console.log(Function("return " + workerFun.toString())()(self))
-                
-                Function("return " + workerFun.toString())()(self);
-
+                Function("return " + factory)()(self);
 
                 /** @type Index */
-                // self["_index"] = new self["FlexSearch"]["Index"](options);
+                // console.log(self["_index"]);
+                self["_index"] = new self["FlexSearch"]["Index"](options);
 
                 // destroy the exported payload
-                // delete self["FlexSearch"];
+                delete self["FlexSearch"];
             }
             else{
 
@@ -56,6 +47,11 @@ export default function(data) {
 
             const id = data["id"];
             const message = index[task].apply(index, args);
+            let sum = 0;
+            for (let index = 0; index < 40000; index++) {
+                sum ++
+            }
+            console.log(sum);
             postMessage(task === "search" ? { "id": id, "msg": message } : { "id": id });
     }
 };

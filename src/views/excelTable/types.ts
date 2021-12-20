@@ -1,10 +1,12 @@
 export interface SheetInfo {
     sheetName: string;
-    sheet: Array<string>;
-    json: Array<string>;
+    sheet_to_formulae: Array<string>;
+    sheet_to_json: Array<any>;
+    sheet_to_csv: string;
+    sheet_to_html: string;
 }
 export interface SheetJsonData {
-    jsonDatas: BINet.ObjectKeys[];
+    jsonDatas: any;
     sheetName: string;
 };
 

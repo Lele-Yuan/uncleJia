@@ -16,9 +16,18 @@ export function filterQuery(dataList: searchItem[] , q: string, limit: number = 
     }).splice(0, limit)
 }
 
+export function testTimeout() {
+    console.log('testTimeout')
+}
 
 let indexIndex: any;
 export function flexsearchQuery(dataList: searchItem[] , q: string, limit: number = 100){
+    dataList = [
+        {"title":"html 开发技术 web 学习技术 开发","url":"html/zh-CN/docs/Web"},
+        {"title":"html CSS JavaScript","url":"/zh-CN/docs/Web/JavaScript"},
+        {"title":"JavaScript 参考","url":"/zh-CN/docs/Web/JavaScript/Reference"},
+        {"title":"Web API 接口参考","url":"/zh-CN/docs/Web/API"},
+    ]
     if(!indexIndex){
         indexIndex = new FlexSearch.Index({ 
 
@@ -77,76 +86,112 @@ export function flexsearchQuery(dataList: searchItem[] , q: string, limit: numbe
         suggest: true, // This can give terrible result suggestions
         // context: true false
     });
+    testTimeout();
     // 搜索关键字会根据初始化 options.encode(str) 进行编码成数组
     return indexResults.map(
         (index: number) => (dataList || [])[index]
     );
 }
 
-let Example = class Example {
-    constructor() {
-        workerFun()
-    }
-};
-function workerFun() {
-    self && (self.onmessage = (e: any) => {
-        console.log(self.postMessage.toString());
-        self.postMessage && self.postMessage(e.data, 'abcdef');
-    })
-}
-let documentIndex: any;
-export async function flexsearchQueryDocument(dataList: searchItem[] , q: string, limit: number = 100) {
-    dataList = [
-        {"title":"html 开发技术 web 学习技术 开发","url":"/zh-CN/docs/Web"},
-        {"title":"html CSS JavaScript","url":"/zh-CN/docs/Web/JavaScript"},
-        {"title":"JavaScript 参考","url":"/zh-CN/docs/Web/JavaScript/Reference"},
-        {"title":"Web API 接口参考","url":"/zh-CN/docs/Web/API"},
-    ]
-    if(!documentIndex){
-        self && ((self as any)['_factory'] = new Example())
-        self && ((self as any)['FlexSearch'] = FlexSearch)
-        documentIndex = new FlexSearch.Document({ 
+let workerIndex: any;
+export async function flexsearchQueryWork(dataList: searchItem[] , q: string, limit: number = 100) {
+    // dataList = [
+    //     {"title":"html 开发技术 web 学习技术 开发","url":"/zh-CN/docs/Web"},
+    //     {"title":"html CSS JavaScript","url":"/zh-CN/docs/Web/JavaScript"},
+    //     {"title":"JavaScript 参考","url":"/zh-CN/docs/Web/JavaScript/Reference"},
+    //     {"title":"Web API 接口参考","url":"/zh-CN/docs/Web/API"},
+    // ]
+    if(!workerIndex){
+        workerIndex = new FlexSearch.Worker({ 
             tokenize: 'full',
             // index 或者 field
-            index: [ 'title', 'url' ],
+            // index: [ 'title', 'url' ],
             // tag 给标签起一个名称，可以在注册或查找时给数据进行分类
-            tag: 'tag',
+            // tag: 'tag',
             // 允许存储复杂的的数据结构，用来和 search 阶段的 enrich: true 配合使用获取复杂的结果集
-            store: true,
+            // store: true,
             // 给key起一个别名，默认为 'id'
             // id: 'id'
 
             // worker  
             // false，this.index 中存放的相多个 new Index ，相当于多次使用 new Index
             // true 
-            worker: true
+            // worker: true
 
         });
-        dataList!.forEach(({title, url}, i) => {
-            documentIndex.add({id: i, title, url, tag: 'tag1'});
+        dataList!.forEach(async ({ title }, i) => {
+            workerIndex.add(i, title);
+        });
+    }
+    let indexResults = await workerIndex.search({
+        query: q,
+        limit,  // limit 返回结果数量默认100
+        // suggest true false
+        // suggest: true 可以实现 搜索web abc可以返回包含web的数据
+        // suggest: false 搜索web abc时返回无结果
+        suggest: true, // This can give terrible result suggestions
+        // context: true false
+    });
+    testTimeout();
+    return indexResults.map(
+        (index: any) => (dataList || [])[index]
+    );
+}
+let documentIndex: any;
+export async function flexsearchQueryDocument(dataList: searchItem[] , q: string, limit: number = 100) {
+    dataList = [
+        {"title":"html 开发技术 web 学习技术 开发","url":"html/zh-CN/docs/Web", tag: ['content', 'link']},
+        {"title":"html CSS JavaScript","url":"/zh-CN/docs/Web/JavaScript", tag: ['link']},
+        {"title":"JavaScript 参考","url":"/zh-CN/docs/Web/JavaScript/Reference", tag: 'link'},
+        {"title":"Web API 接口参考","url":"/zh-CN/docs/Web/API", tag: 'link'},
+    ]
+    if(!documentIndex){
+        // self && ((self as any)['_factory'] = Example)
+        documentIndex = new FlexSearch.Document({ 
+            tokenize: 'full',
+            // index 或者 field
+            field: [ 'title', 'url' ],
+            // tag 给标签起一个名称，可以在注册或查找时给数据进行分类
+            tag: 'tag',
+            // 允许存储复杂的的数据结构，用来和 search 阶段的 enrich: true 配合使用获取复杂的结果集
+            // store: true,
+            // 给key起一个别名，默认为 'id'
+            // id: 'id'
+
+            // worker  
+            // false，this.index 中存放的相多个 new Index ，相当于多次使用 new Index
+            // true 
+            // worker: true
+
+        });
+        // self && ((self as any).FlexSearch.Index = documentIndex)
+        dataList!.forEach(({title, url, tag}, i) => {
+            // documentIndex.add({id: i, title, url: '', tag: 'content'});
+            // documentIndex.add({id: i, title: '', url, tag: 'link'});
+            documentIndex.add({id: i, title, url, tag: tag})
         });
     }
     
     const words = q.trim().toLowerCase().split(/[ ,]+/);
-    const documentResults = await documentIndex.search(q, {
+    let indexResults: searchItem[] = [];
+    const documentResults = documentIndex.search(q, {
         // search:  bool  
         // enrich:true(配合初始化 store: true) 最终结果生成复杂的结构，result: [{id, doc}]
         // store 中存储这 doc 结构数据
         limit,
-        bool: 'or',
-        tag: ['tag1'],
-        enrich: true
+        bool: 'and',
+        tag: [ 'content', 'link' ],
+        // enrich: true
     })
-    console.log(documentResults)
-    // (self as any)._index = documentResults as any;
-    return []
-    // let indexResults: number[] = [];
-    // documentResults.forEach(document => {
-    //     indexResults = indexResults.concat(document.result.filter(item => (indexResults.indexOf(item) === -1)));
-    // });
-    // return indexResults.map(
-    //     (index: number) => (dataList || [])[index]
-    // );
+    console.log(documentResults);
+    documentResults.forEach((document: any) => {
+        document.result.forEach((element: any) => {
+            (indexResults.indexOf(element) === -1) && indexResults.push(element)
+        });
+    });
+    return indexResults.map(
+        (index: any) => (dataList || [])[index]
+    );
 }
 
 export function HighlightMatch({ title, q }: { title: string; q: string }) {

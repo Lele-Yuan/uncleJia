@@ -9,7 +9,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/AutoComplete',
     name: 'AutoComplete',
-    component: () => import('views/AutoComplete/Index.vue')
+    component: () => import(/* webpackChunkName: "AutoComplete" */'views/AutoComplete/Index.vue')
   },
   {
     path: '/excel',

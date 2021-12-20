@@ -1,275 +1,241 @@
 <template>
     <div class="import-file">
-        <div class="header-tips">
-            {{tips}}
+        <div class="header-title">excel上传预览并下载</div>
+        <div v-if="uploadInfo.text" class="warn-info text-ellipsis" :class="uploadInfo.type">{{uploadInfo.text}}</div>
+        <div class="upload mt-16">
+            <el-button type="text" @click="downloadFile">模板下载</el-button>
+            <el-upload :disabled="uploadInfo.disUpload" action="/" accept=".xls,.xlsx" :http-request="uploadSuccess" :show-file-list="false">
+                <el-button size="mini" type="primary" class="upload-button" :disabled="uploadInfo.disUpload">文件上传</el-button>
+            </el-upload>
+            <span class="file-list" v-if="uploadInfo.type === 'success'">{{uploadInfo.fileName}}</span>
         </div>
-        <div
-            v-if="uploadInfo.text"
-            class="warn-info text-ellipsis"
-            :class="uploadInfo.type">
-            <i
-                v-if="uploadInfo.type === 'warn'"
-                style="color: #F27C49;"
-                class="iconfont icon-warn-icon">
-            </i>
-            <i
-                v-if="uploadInfo.type === 'info'"
-                style="color: #4c84FF;"
-                class="iconfont icon-info-icon">
-            </i>
-            <i
-                v-if="uploadInfo.type === 'success'"
-                style="color: #39BF45;"
-                class="el-icon-success">
-            </i>
-            <span class="tips ml-8">
-                {{uploadInfo.text}}
-            </span>
+        <div class="result-table">
+            <div v-for="(item, index) in tableau" :key="index" v-html="item"></div>
         </div>
+
+        <div class="header-title" style="margin-top: 50px;">体重统计报表</div>
         <div>
-            <span class="label-text" @click="downloadFile">模板下载</span>
-            <span class="download">
-                <slot></slot>
-            </span>
+            <div class="his-log-warn" v-if="weightTable.isLoading">加载中......</div>
+            <div class="his-log" v-else-if="weightTable.dataList.length">
+                <div class="label-text">导入完成数据</div>
+            </div>
+            <div v-else-if="weightTable.text" class="warn-info text-ellipsis" :class="weightTable.type"><span class="tips ml-8">{{weightTable.text}}</span></div>
         </div>
         <div class="upload mt-16">
-            <div class="upload-content">
-                <span class="label-text">{{dialogTitle}}文件导入</span>
-                <el-upload
-                    :disabled="disUpload"
-                    action="/"
-                    accept=".xls,.xlsx"
-                    :http-request="uploadSuccess"
-                    :show-file-list="false"
-                >
-                    <el-button
-                            size="mini"
-                            :disabled="disUpload">
-                        <i class="iconfont icon-upload-icon"></i>
-                        文件上传
-                    </el-button>
-                </el-upload>
-            </div>
-            <div class="file-list" v-if="uploadInfo.type === 'success'">
-                <i class="iconfont icon-excel"></i>
-                {{uploadInfo.fileName}}
-            </div>
+            <el-button type="text" @click="downloadWeightFile">模板下载</el-button>
+            <el-upload :disabled="weightTable.disUpload" action="/" accept=".xls,.xlsx" :http-request="uploadWeightFile" :show-file-list="false">
+                <el-button size="mini" type="primary" class="upload-button" :disabled="weightTable.disUpload">文件上传</el-button>
+            </el-upload>
+            <span class="file-list" v-if="uploadInfo.type === 'success'">{{weightTable.fileName}}</span>
         </div>
-        <div v-if="importTime">
-            <div class="his-log-warn" v-if="logInfos.isLoading">
-                加载中......
-            </div>
-            <div class="his-log-warn" v-else-if="!logInfos.list.length">
-                暂无内容
-            </div>
-            <div class="his-log" v-else>
-                <div class="label-text">
-                    导入完成数据
-                </div>
-                <div>
-                    <div class="log-item-tip">
-                        下载完成数据可查看导入情况以及原因
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div id="weightLine"></div>
     </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, toRefs, computed, watch } from 'vue';
-import { readExcel, downloadDialog, fileTypes } from './utils';
-import { ObjectKeys, SheetJsonData } from './types';
-import XLSX from 'xlsx';
+import { defineComponent, reactive, toRefs } from 'vue';
+import { readExcel, downloadDialog, downloadWeight, loading } from './utils';
+import { ObjectKeys, SheetJsonData, SheetInfo } from './types';
+import { dataList } from '../AutoComplete/dataList';
+import * as echarts from 'echarts';
 
 export default defineComponent({
     name: 'ImportFile',
     emits: ['uploadSuccess'],
     props: {
-        dialogTitle: {
-            type: String,
-            default: '标题'
-        },
-        tips: {
-            type: String,
-            default: ''
-        },
-        resultInfo: {
-            type: Object,
-            default: () => {
-                return {};
-            }
-        },
         logInfos: {
             type: Object,
             default: () => {
                 return {};
             }
-        },
-        sheetHeaders: {
-            type: Array as () => {
-                headers: string[];
-            }[],
-            default: () => {
-                return [];
-            }
         }
     },
     setup(props) {
-        const baseUploadInfo = {
-            type: '',
-            text: '',
-            fileName: ''
-        };
         const state = reactive({
             importTime: '',
-            disUpload: false,
             uploadInfo: {
-                ...baseUploadInfo
+                disUpload: false,
+                type: '',
+                text: '',
+                fileName: ''
+            },
+            tableau: [] as string[],
+            weightTable: {
+                disUpload: false,
+                loading: true,
+                type: '',
+                text: '',
+                fileName: '',
+                dataList: []
             }
         });
-        const templateContent: ObjectKeys = fileTypes['template'];
-        const sheetJsonData: SheetJsonData[] = reactive([]);
-        function disabledDate(time: Date) {
-            return time.getTime() > Date.now();
-        }
-        return {
-            ...toRefs(state),
-            disabledDate,
-            templateContent,
-            sheetJsonData
-        };
-    },
-    methods: {
-        downloadFile(){
-            downloadDialog(this.sheetJsonData)
-        },
-        uploadSuccess(params: { file: File }) {
+        let sheetJsonData: SheetJsonData[] = reactive([]);
+        const uploadSuccess = (params: { file: File }) => {
             const file = params.file;
             const fileType = file.name.substring(file.name.lastIndexOf('.') + 1);
             if (fileType !== 'xls' && fileType !== 'xlsx') {
-                this.uploadInfo.type = 'warn';
-                this.uploadInfo.text = '请按照指定模板格式上传';
+                state.uploadInfo.type = 'warn';
+                state.uploadInfo.text = '请按照指定模板格式上传';
             } else {
-                readExcel(file).then(tab => {
-                    if (tab && tab.length) {
-                        if (!tab[0].sheet.length) {
-                            this.uploadInfo.type = 'warn';
-                            this.uploadInfo.text = 'excel不能为空';
+                readExcel(file).then(sheets => {
+                    let hasVale2Key = false;
+                    const valueKey = sheets[sheets.length-1];
+                    hasVale2Key = valueKey.sheetName === '字段对应';
+                    hasVale2Key && (sheets.length = sheets.length -1);
+                    if (sheets && sheets.length) {
+                        if (!sheets[0].sheet_to_formulae.length) {
+                            state.uploadInfo.type = 'warn';
+                            state.uploadInfo.text = 'excel不能为空';
                             return false;
                         }
-                        const some = this.sheetHeaders.some((item, index) => item.headers.some((it, ind: number) => it !== tab[index].sheet[ind].split('=\'')[1]));
-                        if (some) {
-                            this.uploadInfo.type = 'warn';
-                            this.uploadInfo.text = '请按照指定模板格式上传';
-                            return false;
+                        // 最后一个sheet页需存放keyValue对应关系
+                        const hasDisValid = hasVale2Key && sheets.some(tabItem => {
+                            return Object.keys(tabItem.sheet_to_json[0]).some(valueItem => {
+                                return !valueKey.sheet_to_json.find((keyItem: any) => {
+                                    return keyItem.value === valueItem
+                                })
+                            })
+                        })
+                        if (hasDisValid) {
+                            state.uploadInfo.type = 'warn';
+                            state.uploadInfo.text = '请按照指定模板格式上传';
+                            // return false;
                         }
-                        this.disUpload = true;
-                        setTimeout(() => {
-                            this.disUpload = false;
-                        }, 30000);
-                        this.upload({
-                            tab: tab,
+                        state.uploadInfo.disUpload = true;
+                        upload({
+                            sheets: sheets,
                             fileName: file.name
                         });
                     }
                 });
             }
-        },
-        upload(params: {
-            tab: {
-                sheetName: string;
-                sheet: string[];
-            }[];
-            fileName: string;
-        }) {
-            const sheetList = params.tab;
-            sheetList.length = this.templateContent.module.length;
-            const sheetJsonData: SheetJsonData[] = [];
-            sheetList.forEach((it, index) => {
-                const jsonDatas: ObjectKeys[] = [];
-                it.sheet.forEach(item => {
-                    const en = item.split(('='))[0].replace(/[0-9]/ig, '');
-                    const num = Number(item.split('=')[0].replace(/[A-Z]/ig, '')) - 1;
-                    const data = item.includes('=\'') ? item.split('=\'')[1] : item.split('=')[1];
-                    const key = this.templateContent.module[index].titleMap[en];
-                    jsonDatas[num] = Object.values(this.templateContent.module[index].titleMap).reduce((pre: any, curr: any) => {
-                        return {
-                            [curr]: '',
-                            ...jsonDatas[num],
-                            ...pre,
-                            ...(curr === key ? {
-                                [key]: data
-                            } : {})
-                        };
-                    }, {}) as ObjectKeys;
-                });
-                jsonDatas.shift();
-                sheetJsonData[index] = {
-                    sheetName: it.sheetName,
-                    jsonDatas
+        };
+        const upload = (params: { sheets: SheetInfo[]; fileName: string;}) => {
+            const sheetList = params.sheets;
+            const sheetJson: SheetJsonData[] = [];
+            
+            sheetList.forEach((sheet, index) => {
+                state.tableau.push(sheet.sheet_to_html);
+                sheetJson[index] = {
+                    sheetName: sheet.sheetName,
+                    // jsonDatas: sheet.sheet_to_csv
+                    jsonDatas: sheet.sheet_to_json
                 };
             });
-            if (sheetJsonData.every(i => i.jsonDatas.length > 0)) {
-                this.uploadInfo = {
-                    type: 'info',
-                    text: '异步执行中...',
-                    fileName: params.fileName
-                };
-                console.log(sheetJsonData);
-                this.sheetJsonData = sheetJsonData;
-                // (this.type === 'account'
-                //     ? this.funImportAccount(sheetJsonData, this.accountTypeList)
-                //     : this.handelUpload({
-                //         [this.templateContent.paramsKey]: sheetJsonData[0].jsonDatas
-                //     }, this.templateContent.api)).then(res => {
-                //     if (res.status === 200) {
-                //         this.uploadInfo = {
-                //             type: 'success',
-                //             text: '导入成功，可在下方根据日期查询详细结果',
-                //             fileName: params.fileName
-                //         };
-                //     } else {
-                //         this.uploadInfo = {
-                //             type: 'warn',
-                //             text: res.desc ?? `${UNKNOWN_MSG} ${res.status}`,
-                //             fileName: params.fileName
-                //         };
-                //     }
-                // });
+            if (sheetJson.every(i => i.jsonDatas.length > 0)) {
+                state.uploadInfo.type = 'info';
+                state.uploadInfo.text = '异步执行中...';
+                state.uploadInfo.fileName = params.fileName
+                console.log(sheetJson);
+                sheetJsonData = sheetJson;
+                state.uploadInfo.type = 'success';
+                state.uploadInfo.text = '导入成功，可在下方根据日期查询详细结果';
+
+                setTimeout(() => {
+                    state.uploadInfo.disUpload = false;
+                }, 100);
             } else {
-                this.uploadInfo = {
-                    type: 'warn',
-                    text: 'excel不能为空',
-                    fileName: ''
-                };
-                this.disUpload = false;
+                state.uploadInfo.type = 'warn';
+                state.uploadInfo.text = 'excel不能为空';
+                state.uploadInfo.disUpload = false;
             }
         }
+        const downloadFile = () => {
+            downloadDialog();
+        };
+        const downloadWeightFile = () => {
+            downloadWeight();
+        };
+
+        const weightDataFormat = (sheetHeaders: SheetInfo[]) => {
+            const data = {'日期': [], '体重': []} as {'日期': any, '体重': any};
+            const hasDisValid = sheetHeaders.some((item, index) => 
+                item.sheet_to_json.some((it: any, ind: number) => 
+                    Object.keys(data).some((header: string) => {
+                        if(it[header]) {
+                            data[header as ('日期' | '体重')].push(it[header]);
+                        }
+                        return !it[header]
+                    })
+                )
+            );
+            return hasDisValid ? false : data;
+        };
+        const initEchart = (dataFormat: {'日期': any, '体重': any}) => {
+            var myChart = echarts.init(document.getElementById('weightLine') as HTMLElement, {}, {
+                width: 600, height: 300
+            });
+            // 绘制图表
+            myChart.setOption({
+                title: {
+                    text: '体重统计'
+                },
+                tooltip: {},
+                xAxis: {
+                    data: dataFormat['日期']
+                },
+                yAxis: {},
+                series: [{
+                    name: '体重',
+                    type: 'line',
+                    data: dataFormat['体重']
+                }]
+            });
+        };
+        const uploadWeightFile = (params: { file: File }) => {
+            const file = params.file;
+            const fileType = file.name.substring(file.name.lastIndexOf('.') + 1);
+            if (fileType !== 'xls' && fileType !== 'xlsx') {
+                state.weightTable.type = 'warn';
+                state.weightTable.text = '请按照指定模板格式上传';
+            } else {
+                loading();
+                readExcel(file).then(sheets => {
+                    if (sheets && sheets.length) {
+                        if (!sheets[0].sheet_to_formulae.length) {
+                            state.weightTable.type = 'warn';
+                            state.weightTable.text = 'excel不能为空';
+                            loading(false);
+                            return false;
+                        }
+                        state.weightTable.type = 'info';
+                        state.weightTable.text = '异步执行中...';
+                        state.weightTable.fileName = file.name;
+                        const dataFormat = weightDataFormat(sheets);
+                        if (!dataFormat) {
+                            state.weightTable.type = 'warn';
+                            state.weightTable.text = '请按照指定模板格式上传';
+                            loading(false);
+                            return false;
+                        }
+                        console.log(dataFormat);
+                        initEchart(dataFormat);
+                        setTimeout(() => {
+                            state.weightTable.type = 'success';
+                            state.weightTable.text = '导入成功，可在下方根据日期查询详细结果';
+                            state.weightTable.disUpload = true;
+                            loading(false);
+                        }, 1000);
+                    }
+                })
+            }
+        };
+        return {
+            ...toRefs(state),
+            sheetJsonData,
+            uploadSuccess,
+            downloadFile,
+            downloadWeightFile,
+            uploadWeightFile
+        };
     }
 });
 </script>
 <style lang="less">
 .import-file{
-    width: 300px;
+    width: 600px;
     margin: auto;
+    padding-bottom: 50px;
     text-align: center;
-    .el-dialog__title {
-        font-weight: bold;
-    }
-    .el-dialog__footer .el-button {
-        padding: 5px 24px;
-    }
-    .el-dialog__body .el-button {
-        padding: 5px 16px;
-    }
-    .el-dialog__footer {
-        padding-top: 16px;
-    }
-    .header-tips {
-        font-size: @font-size-normal;
-        color: @font-subtit-color;
-        margin-bottom: 12px;
-    }
     .label-text {
         display: inline-block;
         width: 130px;
@@ -311,9 +277,13 @@ export default defineComponent({
     }
     .upload {
         padding-bottom: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .upload-button {
+            margin: 0 25px;
+        }
         .file-list {
-            margin-left: 126px;
-            margin-top: 10px;
             color: @font-content-color;
             font-size: @font-size-normal;
             cursor: pointer;
@@ -322,47 +292,11 @@ export default defineComponent({
             }
         }
     }
-    .upload-content {
-        display: flex;
-        .des-text {
-            margin-top: 4px;
-            font-size: @font-size-normal;
-            color: @font-gray-color;
-        }
-        .el-upload-list__item-name {
-            font-size: @font-size-normal;
-            color: @font-content-color;
-        }
-    }
     .download, .download>*{
         color: @primary-blue-color;
         cursor: pointer;
         font-size: @font-size-normal;
         text-decoration: underline;
-    }
-    .his-info {
-        padding-top: 14px;
-        border-top: 1px solid @background-active-color;
-        .nav-title {
-            font-size: @font-size-normal;
-            font-weight: bold;
-            padding: 0 0 0 8px;
-            position: relative;
-            margin: 10px 0;
-            color: #000000;
-            &::before {
-                content: "";
-                position: absolute;
-                width: 4px;
-                height: 12px;
-                background: @primary-blue-color;
-                left: 0;
-                bottom: 2px;
-            }
-        }
-        .el-date-editor {
-            width: 182px;
-        }
     }
     .his-log-warn {
         margin-top: 20px;
@@ -393,6 +327,13 @@ export default defineComponent({
             font-size: @font-size-normal;
             color: @font-gray-color
         }
+    }
+}
+table {
+    border-collapse: collapse;
+    margin: 20px auto;
+    td {
+        border: 1px solid #333;
     }
 }
 </style>

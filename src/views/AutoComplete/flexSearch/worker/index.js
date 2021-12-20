@@ -127,6 +127,8 @@ function register(key){
     };
 }
 
+import Worker from './index.worker.js'
+
 function create(factory, is_node_js, worker_path){
 
     let worker
@@ -148,7 +150,7 @@ function create(factory, is_node_js, worker_path){
                     ], { "type": "text/javascript" })
                 ))
             :
-                new Worker(is_string(worker_path) ? worker_path : "worker/worker.js", { type: "module" })
+                new Worker()
         );
     }
     catch(e){}

@@ -1,4 +1,5 @@
 export type searchItem = {
     title: string;
-    url: string
+    url: string;
+    tag?: string | string[]
 };

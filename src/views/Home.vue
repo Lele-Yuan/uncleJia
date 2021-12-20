@@ -11,7 +11,6 @@ import { defineComponent, ref } from 'vue';
 import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 import defineProps from '@/components/defineProps.vue';
 
-const msg = ref(false);
 </script>
 <style lang="less">
 .home{

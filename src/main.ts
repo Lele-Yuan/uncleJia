@@ -28,9 +28,8 @@ import {
     ElTooltip,
     ElBreadcrumb,
     ElBreadcrumbItem,
-    ElLoading,
     ElMessage,
-    ElMessageBox,
+    ElLoading,
     ElMenu,
     ElMenuItemGroup,
     ElMenuItem,
@@ -78,6 +77,9 @@ const components = [
     ElTree,
     ElCheckboxGroup
 ];
+
+window.$message = ElMessage;
+window.$loading = ElLoading;
 
 const instance = createApp(App).use(store).use(router)
 components.forEach(component => {
