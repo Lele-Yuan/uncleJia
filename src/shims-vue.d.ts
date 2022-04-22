@@ -9,4 +9,6 @@ interface Window {
   $loading: any;
   showOpenFilePicker: any;
   showSaveFilePicker: any;
+  tracking: any;
+  plot: any;
 }

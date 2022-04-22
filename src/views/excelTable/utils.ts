@@ -142,7 +142,7 @@ export function downloadDialog(sheetDatas?: SheetJsonData[], saveName: string = 
     downloadUrl(url, saveName);
 }
 
-function downloadUrl(url: any, saveName: string) {
+export function downloadUrl(url: any, saveName: string) {
     if (typeof url == 'object' && url instanceof Blob) {
         url = URL.createObjectURL(url); // 创建blob地址
     }

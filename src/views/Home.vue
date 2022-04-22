@@ -1,7 +1,9 @@
 <template>
   <div class="home">
     <img class="home-logo" alt="Vue logo" src="../assets/logo.svg">
-    <defineProps msg></defineProps>
+    <div style="position: relative;">
+      <defineProps msg></defineProps>
+    </div>
     <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
   </div>
 </template>
@@ -15,7 +17,7 @@ import defineProps from '@/components/defineProps.vue';
 <style lang="less">
 .home{
   .home-logo{
-    width: 200px;
+    width: 100px;
   }
 }
 </style>

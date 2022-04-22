@@ -16,6 +16,16 @@ const routes: Array<RouteRecordRaw> = [
     name: 'ExcelTable',
     component: () => import(/* webpackChunkName: "ExcelTable" */ 'views/excelTable/Index.vue')
   },
+  {
+    path: '/face',
+    name: 'LiveFace',
+    component: () => import(/* webpackChunkName: "LiveFace" */ 'views/LiveFace/Index.vue')
+  },
+  {
+    path: '/canvas',
+    name: 'canvas',
+    component: () => import(/* webpackChunkName: "LiveFace" */ 'views/canvas/Index.vue')
+  },
   // {
   //   path: '/about',
   //   name: 'About',
