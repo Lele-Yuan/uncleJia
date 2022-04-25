@@ -12,14 +12,14 @@
 import { onMounted } from "vue";
 import { downloadUrl } from "../excelTable/utils";
 
-let canvas = null as any, ctx = null as any;
+let canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D;
 const padding = 30, height = 30;
 onMounted(() => {
-    canvas = document.getElementById('signCanvas');
-    ctx = canvas.getContext('2d');
-    drawButtons('清空', 85, 10);
-    drawButtons('撤销一步', 155, 10);
-    drawButtons('保存', 250, 10);
+    canvas = document.getElementById('signCanvas') as HTMLCanvasElement;
+    ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+    // drawButtons('清空', 85, 10);
+    // drawButtons('撤销一步', 155, 10);
+    // drawButtons('保存', 250, 10);
 })
 
 let isDraw = false;
@@ -71,7 +71,7 @@ const click = (event: any) => {
 }
 
 const start = (event: any) => {
-    click(event);
+    // click(event);
     isDraw = true;
     lastX = event.offsetX;
     lastY = event.offsetY;

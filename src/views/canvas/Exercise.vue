@@ -152,10 +152,25 @@ const drawStar = () => {
     animate();
 }
 
+let graphCanvas = null;
+let ctxGraph = null as any;
+
+const drawCircleRect = (x: number, y: number, width: number, height: number, radio: number) => {
+    ctxGraph.beginPath();
+    ctxGraph.moveTo(x, radio + y);
+    ctxGraph.arcTo(x, height + y, width + x, height + y, radio);
+    ctxGraph.arcTo(width + x, height + y, width + x, y, radio);
+    ctxGraph.arcTo(width + x, y, x, y, radio);
+    ctxGraph.arcTo(x, y, x, radio + y, radio);
+    ctxGraph.fill()
+}
+
 const drawGraph = () => {
-    const graphCanvas = document.getElementById('graphCanvas') as any;
-    const ctxGraph = graphCanvas.getContext('2d');
+    graphCanvas = document.getElementById('graphCanvas') as any;
+    ctxGraph = graphCanvas.getContext('2d');
     ctxGraph.lineWidth = 0.4;
+    ctxGraph.fillStyle = '#2F5BEA';
+    ctxGraph.strokeStyle = '#2F5BEA';
     
     ctxGraph.save();
 
@@ -194,6 +209,10 @@ const drawGraph = () => {
     ctxGraph.arc(0,0,30,0,45*Math.PI/180);
     ctxGraph.closePath();
     ctxGraph.stroke();
+
+    ctxGraph.restore();
+    // ctxGraph.translate(30, 90);
+    drawCircleRect(30, 90, 100, 30, 10);
 };
 
 onMounted(() => {

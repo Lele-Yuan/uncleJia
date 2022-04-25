@@ -1,11 +1,11 @@
 <template>
-  <div id="nav">
+  <!-- <div id="nav">
     <router-link to="/">Home</router-link> |
     <router-link to="/AutoComplete">AutoComplete</router-link> |
     <router-link to="/excel">ExcelTable</router-link> |
     <router-link to="/face">LiveFace</router-link> |
     <router-link to="/canvas">Canvas</router-link>
-  </div>
+  </div> -->
   <router-view/>
 </template>
 
