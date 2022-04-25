@@ -13,16 +13,65 @@ import { onMounted } from "vue";
 import { downloadUrl } from "../excelTable/utils";
 
 let canvas = null as any, ctx = null as any;
+const padding = 30, height = 30;
 onMounted(() => {
     canvas = document.getElementById('signCanvas');
     ctx = canvas.getContext('2d');
+    drawButtons('清空', 85, 10);
+    drawButtons('撤销一步', 155, 10);
+    drawButtons('保存', 250, 10);
 })
 
 let isDraw = false;
 let lastX = 0, lastY = 0, WIDTH = 400, HEIGHT = 200;
 const imgStack = [] as any[];
 
+const getBtnLine = (text: string, x: number, y: number) => {
+    ctx.beginPath();
+    ctx.fillStyle = '#fff';
+    ctx.font = '14px PingFang';
+    const textMeasure = ctx.measureText(text);
+    ctx.fillStyle = '#409eff';
+    ctx.rect(x, y, textMeasure.width + padding, height);
+};
+
+const drawButtons = (text: string, x: number, y: number) => {
+    getBtnLine(text, x, y);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = '14px PingFang';
+    ctx.fillText(text, x + padding / 2, height);
+};
+
+const click = (event: any) => {
+
+    let clickBtn = false;
+    const x = event.offsetX, y = event.offsetY;
+    getBtnLine('清空', 85, 10);
+    clickBtn = ctx.isPointInPath(x, y)
+    if (clickBtn) {
+        isDraw = false;
+        handleClear();
+        return;
+    }
+    getBtnLine('撤销一步', 155, 10);
+    clickBtn = ctx.isPointInPath(x, y)
+    if (clickBtn) {
+        isDraw = false;
+        handleReset();
+        return;
+    }
+    getBtnLine('保存', 250, 10);
+    clickBtn = ctx.isPointInPath(x, y)
+    if (clickBtn) {
+        isDraw = false;
+        handleConfirm();
+        return;
+    }
+}
+
 const start = (event: any) => {
+    click(event);
     isDraw = true;
     lastX = event.offsetX;
     lastY = event.offsetY;
@@ -62,6 +111,9 @@ const drawLine = (x: number, y: number) => {
 const handleClear = () => {
     imgStack.length = 0;
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    drawButtons('清空', 85, 10);
+    drawButtons('撤销一步', 155, 10);
+    drawButtons('保存', 250, 10);
 }
 const handleReset = () => {
     if (imgStack.length === 0) return;

@@ -3,6 +3,7 @@
         <Sign />
         <Ticket class="ticket-wrap" />
         <Clock class="ticket-wrap" />
+        <Pie />
     </div>
     <!-- <div class="flex">
         <Exercise />
@@ -13,6 +14,7 @@ import Ticket from "./Ticket.vue";
 import Sign from "./Sign.vue";
 import Clock from "./Clock.vue";
 import Exercise from './Exercise.vue';
+import Pie from './Pie.vue';
 
 </script>
 
@@ -23,6 +25,7 @@ import Exercise from './Exercise.vue';
     flex-wrap: wrap;
     :deep canvas {
         border: 1px solid #c2cdf9;
+        box-sizing: border-box;
     }
 }
 .ticket-wrap {
