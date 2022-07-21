@@ -24,7 +24,7 @@ onMounted(() => {
 
 let isDraw = false;
 let lastX = 0, lastY = 0, WIDTH = 400, HEIGHT = 200;
-const imgStack = [] as any[];
+const imgStack = [] as ImageData[];
 
 const getBtnLine = (text: string, x: number, y: number) => {
     ctx.beginPath();
@@ -35,6 +35,58 @@ const getBtnLine = (text: string, x: number, y: number) => {
     ctx.rect(x, y, textMeasure.width + padding, height);
 };
 
+const start = (event: any) => {
+    // click(event);
+    isDraw = true;
+    lastX = event.offsetX;
+    lastY = event.offsetY;
+    let imgData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
+    imgStack.push(imgData);
+}
+const draw = (event: any) => {
+    if (!isDraw) return;
+    ctx.beginPath();
+    const x = event.offsetX;
+    const y = event.offsetY;
+    // 画图
+    drawLine(x, y);
+}
+
+const stop = (event: any) => {
+    isDraw = false;
+}
+
+const drawLine = (x: number, y: number) => {
+    ctx.beginPath();
+    ctx.lineWidth = 2; //设置线宽状态
+    // ctx.strokeStyle = 'red'; //设置线的颜色状态
+    ctx.lineCap = 'round'
+    ctx.lineJoin = "round";
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.closePath();
+    // 每次移动都要更新坐标位置
+    lastX = x;
+    lastY = y;
+}
+
+const handleClear = () => {
+    imgStack.length = 0;
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+}
+const handleReset = () => {
+    if (imgStack.length === 0) return;
+    ctx.putImageData(imgStack.pop() as ImageData, 0, 0);
+}
+const handleConfirm = () => {
+    const base64Img = canvas.toDataURL('image/png');
+    const img = document.createElement('img');
+    img.src = base64Img;
+    downloadUrl(base64Img, '签名.png');
+}
+
+
 const drawButtons = (text: string, x: number, y: number) => {
     getBtnLine(text, x, y);
     ctx.fill();
@@ -44,7 +96,6 @@ const drawButtons = (text: string, x: number, y: number) => {
 };
 
 const click = (event: any) => {
-
     let clickBtn = false;
     const x = event.offsetX, y = event.offsetY;
     getBtnLine('清空', 85, 10);
@@ -70,61 +121,6 @@ const click = (event: any) => {
     }
 }
 
-const start = (event: any) => {
-    // click(event);
-    isDraw = true;
-    lastX = event.offsetX;
-    lastY = event.offsetY;
-    let imgData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
-    imgStack.push(imgData);
-}
-const draw = (event: any) => {
-    if (!isDraw) return;
-    ctx.beginPath();
-    const x = event.offsetX;
-    const y = event.offsetY;
-    
-    // 画图
-    // ctx.globalCompositeOperation = 'destination-out';
-    drawLine(x, y);
-}
-
-const stop = (event: any) => {
-    isDraw = false;
-}
-
-const drawLine = (x: number, y: number) => {
-    ctx.beginPath();
-    ctx.lineWidth = 2; //设置线宽状态
-    ctx.strokeStyle = 'red'; //设置线的颜色状态
-    ctx.lineCap = 'round'
-    ctx.lineJoin = "round";
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.closePath();
-    // 每次移动都要更新坐标位置
-    lastX = x;
-    lastY = y;
-}
-
-const handleClear = () => {
-    imgStack.length = 0;
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    drawButtons('清空', 85, 10);
-    drawButtons('撤销一步', 155, 10);
-    drawButtons('保存', 250, 10);
-}
-const handleReset = () => {
-    if (imgStack.length === 0) return;
-    ctx.putImageData(imgStack.pop(), 0, 0);
-}
-const handleConfirm = () => {
-    const base64Img = canvas.toDataURL('image/png');
-    const img = document.createElement('img');
-    img.src = base64Img;
-    downloadUrl(base64Img, '签名.png');
-}
 </script>
 
 <style lang="less" scoped>

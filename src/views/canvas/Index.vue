@@ -1,14 +1,22 @@
 <template>
-<el-button type="danger" size="mini" @click="saveScreen" data-html2canvas-ignore>保存页面</el-button>
-    <div class="flex">
-        <Sign />
-        <Ticket class="ticket-wrap" />
-        <Clock class="ticket-wrap" />
-        <Pie />
-    </div>
-    <div class="flex">
-        <Exercise />
-    </div>
+<div class="mb-10">
+    <el-button type="danger" size="mini" @click="saveScreen" data-html2canvas-ignore>保存页面</el-button>
+</div>
+<div class="flex">
+    <Sign />
+</div>
+<div class="flex">
+    <Pie />
+</div>
+<div class="flex">
+    <!-- <Sign />
+    <Pie /> -->
+    <!-- <Ticket class="ticket-wrap" />
+    <Clock class="ticket-wrap" /> -->
+</div>
+<!-- <div class="flex">
+    <Exercise />
+</div> -->
 </template>
 <script lang="ts" setup>
 import Ticket from "./Ticket.vue";

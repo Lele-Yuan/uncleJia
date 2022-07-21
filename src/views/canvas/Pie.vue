@@ -1,5 +1,6 @@
 <template>
-<canvas id="pieCanvas" width="400" height="200" @mousemove="handleMousemove"></canvas>
+<!-- <canvas id="pieCanvas" width="400" height="200" @mousemove="handleMousemove"></canvas> -->
+<canvas id="pieCanvas" width="400" height="200"></canvas>
 </template>
 <script lang="ts" setup>
 import { onMounted } from "vue";
@@ -33,7 +34,7 @@ onMounted(() => {
     cy = canvas.height / 2;
     ctx.translate(cx, cy); // 将画布原点移动到圆心
 
-    render(true);
+    render(true); // 入场动画
     
 })
 const speed = 10 / 180 * Math.PI;
@@ -64,6 +65,33 @@ const render = (animation = false) => {
     }
 }
 
+const getGraph = (startAngle: number, endAngle: number, radius: number) => {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    // ctx.lineTo(radius * Math.cos(startAngle), radius * Math.sin(startAngle)); // 开始线
+    ctx.arc(0, 0, radius, startAngle, endAngle); // 弧形
+    ctx.closePath(); // 回到原心
+};
+
+const drawSector = (startAngle: number, endAngle: number, color: string, index: number) => {
+    ctx.save();
+    // 画外圆
+    const outRadius = hoverIndex === index ? oR * hoverRadio : oR;
+    getGraph(startAngle, endAngle, outRadius);
+    ctx.fillStyle = color
+    ctx.fill();
+
+    ctx.globalCompositeOperation = 'destination-out';
+    // 画内圆
+    getGraph(startAngle, endAngle, iR);
+    ctx.fill();
+
+    // 内全画完后会留下一个边覆盖不全
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+};
+
 const handleMousemove = (event: any) => {
     let startAngle = 0;
     const x = event.offsetX, y = event.offsetY;
@@ -93,35 +121,8 @@ const handleMousemove = (event: any) => {
         }
         startAngle += angle;
     }
-    
 };
 
-const getGraph = (startAngle: number, endAngle: number, radius: number) => {
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    // ctx.lineTo(radius * Math.cos(startAngle), radius * Math.sin(startAngle)); // 开始线
-    ctx.arc(0, 0, radius, startAngle, endAngle); // 弧形
-    ctx.closePath(); // 回到原心
-};
-
-const drawSector = (startAngle: number, endAngle: number, color: string, index: number) => {
-    ctx.save();
-    // 画外圆
-    const outRadius = hoverIndex === index ? oR * hoverRadio : oR;
-    getGraph(startAngle, endAngle, outRadius);
-    ctx.fillStyle = color
-    ctx.fill();
-
-    ctx.globalCompositeOperation = 'destination-out';
-    // 画内圆
-    getGraph(startAngle, endAngle, iR);
-    ctx.fill();
-
-    // 内全画完后会留下一个边覆盖不全
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.restore();
-};
 
 </script>
 
