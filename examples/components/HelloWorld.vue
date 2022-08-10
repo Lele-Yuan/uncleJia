@@ -8,6 +8,7 @@
     </ul>
 
     <h1>{{ msg }}</h1>
+    <slot></slot>
   </div>
 </template>
 

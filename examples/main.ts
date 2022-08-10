@@ -81,7 +81,9 @@ const components = [
 window.$message = ElMessage;
 window.$loading = ElLoading;
 
-const instance = createApp(App).use(store).use(router)
+import widget from '../packages'
+
+const instance = createApp(App).use(store).use(router).use(widget);
 components.forEach(component => {
     instance!.component(component.name, component);
 });

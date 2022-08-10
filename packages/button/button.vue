@@ -1,0 +1,44 @@
+<template>
+  <div class="j_button">
+    <slot></slot>
+  </div>
+</template>
+<script>
+import { defineComponent } from 'vue'
+export default defineComponent({
+  name: 'JButton',
+  props: {
+    msg: ''
+  },
+  data() {
+    return {
+    }
+  }
+})
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+.j_button {
+  display: inline-block;
+  cursor: pointer;
+  min-height: 30px;
+  line-height: 1;
+  font-weight: 500;
+  padding: 10px 20px;
+  white-space: nowrap;
+  box-sizing: border-box;
+  border: 1px solid;
+  transition: .1s;
+  font-size: 14px;
+  border-radius: 4px;
+  vertical-align: middle;
+  position: relative;
+  transition: border-color 0.3s, background-color 0.3s;
+  transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);
+}
+.j_button:hover {
+  border-color: #3f51b5;
+  background-color: rgba(63, 81, 181, 0.1);
+}
+</style>

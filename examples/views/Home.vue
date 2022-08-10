@@ -4,7 +4,9 @@
     <div style="position: relative;">
       <defineProps msg></defineProps>
     </div>
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" >HelloWorld</HelloWorld>
+    <j-button msg="install button">Jbutton</j-button>
+    <el-button>adsajds</el-button>
   </div>
 </template>
 
