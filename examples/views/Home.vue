@@ -5,13 +5,11 @@
       <defineProps msg></defineProps>
     </div>
     <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" >HelloWorld</HelloWorld>
-    <j-button msg="install button">Jbutton</j-button>
-    <el-button>adsajds</el-button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 import defineProps from '@/components/defineProps.vue';
 

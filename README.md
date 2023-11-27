@@ -19,6 +19,7 @@ yarn build
 - [HOME](https://lele-yuan.github.io/uncleJia)
 - [AutoComplete](https://lele-yuan.github.io/uncleJia/#/AutoComplete)
 - [ExcelTable](https://lele-yuan.github.io/uncleJia/#/excel)
+- [indexedDB](https://lele-yuan.github.io/uncleJia/#/indexedDB))
 
 ## 引入全局less文件
 ### 安装loader

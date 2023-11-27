@@ -24,7 +24,27 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/canvas',
     name: 'canvas',
-    component: () => import(/* webpackChunkName: "LiveFace" */ 'views/canvas/Index.vue')
+    component: () => import(/* webpackChunkName: "canvas" */ 'views/canvas/Index.vue')
+  },
+  {
+    path: '/border-radius',
+    name: 'borderRadius',
+    component: () => import(/* webpackChunkName: "borderRadius" */ 'views/Border/radius.vue')
+  },
+  {
+    path: '/border-image',
+    name: 'borderImage',
+    component: () => import(/* webpackChunkName: "borderImage" */ 'views/Border/image.vue')
+  },
+  {
+    path: '/test',
+    name: 'Test',
+    component: () => import(/* webpackChunkName: "Test" */ 'views/Test/Index.vue')
+  },
+  {
+    path: '/indexedDB',
+    name: 'indexedDB',
+    component: () => import(/* webpackChunkName: "indexedDB" */ 'views/indexedDB/Index.vue')
   },
   // {
   //   path: '/about',
