@@ -73,7 +73,7 @@ function getEntries(path) {
     console.log(entries);
     return entries
 }
-const buildConfig = {
+const packageConfig = {
     outputDir: 'lib',
     productionSourceMap: false,
     configureWebpack: {
@@ -125,4 +125,5 @@ const buildConfig = {
     }
 }
 
-module.exports = process.env.NODE_ENV === 'development' ? devConfig : buildConfig;
+console.log('process.env: ', process.env);
+module.exports = process.env.NODE_ENV === 'package' ? packageConfig : devConfig;

@@ -5,7 +5,7 @@ import store from './store'
 import './assets/styles/base.less';
 import 'element-plus/theme-chalk/index.css';
 import lang from 'element-plus/lib/locale/lang/zh-cn';
-import UncleJia from '@unclejia/components'
+import UncleJia from '@unclejia/components';
 import '@unclejia/components/lib/style.css';
 import {
     ElButton,
