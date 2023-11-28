@@ -43,8 +43,8 @@ export default class IndexedDbUtils {
     }
 
     /**
-     * 
-     * @returns 
+     * 初始化数据库配置，打开数据库
+     * @returns 打开数据库的Promise
      */
     init() {
         this.dbOpeningPromise = new Promise ((resolve, reject) => {
@@ -121,46 +121,26 @@ export default class IndexedDbUtils {
         })
     }
 
-    openTransaction(objectStoreName: string, mode = 'readonly') {
+    openTransaction(objectStoreName: string, mode = 'readonly', oncomplete?: () => void, onerror?: (err: any) => void) {
         const transaction = (this.dbIstance as IDBDatabase).transaction([objectStoreName], mode as IDBTransactionMode);
 
         transaction.onerror = ((err) => {
             console.log('数据库事务错误', err);
+            onerror?.(err);
         })
 
         transaction.oncomplete = (() => {
             console.log('数据库事务完成');
+            oncomplete?.();
         })
         return transaction.objectStore(objectStoreName);
     }
 
     /**
-     * 
+     * 获取全部数据
      * @param objectStoreName 对象存储名称
-     * @param data 插入的数据：单个对象或数组
      * @returns 
      */
-    add(objectStoreName: string, data: object | object[]) {
-        const objectStore = this.openTransaction(objectStoreName, 'readwrite');
-        if (Array.isArray(data)) {
-            data.forEach(item => {
-                this.addData(objectStore, item);
-            })
-        } else {
-            this.addData(objectStore, data);
-        }
-    }
-
-    addData(objectStore: IDBObjectStore, data: object) {
-        const request = objectStore.add(data);
-        request.onsuccess = () => {
-            console.log('数据插入成功', data);
-        };
-        request.onerror = event => {
-            console.log('数据插入失败', event);
-        };
-    }
-
     getAllData(objectStoreName: string): Promise<any[]> {
         const request = this.openTransaction(objectStoreName).getAll();
         return new Promise((resolve, reject) => {
@@ -173,5 +153,105 @@ export default class IndexedDbUtils {
                 reject(event);
             };
         })
+    }
+
+    /**
+     * 插入单条数据，或者批量插入数据
+     * @param objectStoreName 对象存储名称
+     * @param data 插入的数据：单个对象或数组
+     * @returns 
+     */
+    add(objectStoreName: string, data: object | object[]) {
+        return new Promise((resolve, reject) => {
+            const objectStore = this.openTransaction(
+                objectStoreName,
+                'readwrite',
+                () => resolve(true),
+                err => reject(err)
+            );
+            if (Array.isArray(data)) {
+                data.forEach(item => {
+                    this.addData(objectStore, item);
+                })
+            } else {
+                this.addData(objectStore, data);
+            }
+        });
+    }
+
+    /**
+     * 插入单条数据
+     * @param objectStore 对象存储
+     * @param data 插入的数据
+     */
+    addData(objectStore: IDBObjectStore, data: object) {
+        const request = objectStore.add(data);
+        request.onsuccess = () => {
+            console.log('数据插入成功', data);
+        };
+        request.onerror = event => {
+            console.log('数据插入失败', event);
+        };
+    }
+
+    /**
+     * 修改单条数据，或者批量修改数据
+     * @param objectStoreName 对象存储名称
+     * @param data 修改的数据：单个对象或数组
+     * @returns 
+     */
+    put(objectStoreName: string, data: object) {
+        return new Promise((resolve, reject) => {
+            const objectStore = this.openTransaction(
+                objectStoreName,
+                'readwrite',
+                () => resolve(true),
+                err => reject(err)
+            );
+            if (Array.isArray(data)) {
+                data.forEach(item => {
+                    this.putData(objectStore, item);
+                })
+            } else {
+                this.putData(objectStore, data);
+            }
+        });
+    }
+    /**
+     * 修改单条数据
+     * @param objectStore 对象存储
+     * @param data 修改的数据
+     */
+    putData(objectStore: IDBObjectStore, data: object) {
+        const request = objectStore.put(data);
+        request.onsuccess = () => {
+            console.log('数据修改成功', data);
+        };
+        request.onerror = event => {
+            console.log('数据修改失败', event);
+        };
+    }
+
+    /**
+     * 根据主键删除数据
+     * @param objectStoreName 对象存储名称
+     * @param primaryKey 主键
+     * @returns 
+     */
+    delete(objectStoreName: string, primaryKey: string) {
+        return new Promise((resolve, reject) => {
+            const request = this.openTransaction(
+                objectStoreName,
+                'readwrite',
+                () => resolve(true),
+                err => reject(err)
+            ).delete(primaryKey);
+            request.onsuccess = () => {
+                console.log('数据删除成功');
+            };
+            request.onerror = event => {
+                console.log('数据删除失败', event);
+            };
+        });
     }
 }
