@@ -11,6 +11,9 @@ function resolve (dir) {
 }
 
 const devConfig = {
+    publicPath: './',
+    assetsDir: '',
+    productionSourceMap: false,
     devServer: {
         port: 8088,
         https: false,
