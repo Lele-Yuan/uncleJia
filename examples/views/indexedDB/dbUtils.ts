@@ -15,7 +15,6 @@ interface IObjectStore {
 
 export enum STATUS {
     start,
-    processing,
     reopen,
     complete,
 }
@@ -24,8 +23,8 @@ export interface IJob {
     id: string;
     title: string;
     state: STATUS;
-    createTime: string;
-    updateTime?: string;
+    createTime: number;
+    updateTime?: number;
 }
 
 export default class IndexedDbUtils {
@@ -233,6 +232,48 @@ export default class IndexedDbUtils {
     }
 
     /**
+     * 通过索引范围修改数据
+     * @param objectStoreName 对象存储名称
+     * @param indexName 索引名称
+     * @param keyRangbe 索引范围
+     * @param data 修改的数据
+     * @returns 
+     */
+    putByIndex(objectStoreName: string, indexName: string, keyRangbe: [number | null, number | null] | number, data: object) {
+        return new Promise((resolve, reject) => {
+            const DBKeyRange = typeof keyRangbe === 'number' ? IDBKeyRange.only(keyRangbe) : IDBKeyRange.bound(...keyRangbe, true, true);
+            console.log('DBKeyRange: ', DBKeyRange);
+            const request = this.openTransaction(
+                objectStoreName,
+                'readwrite',
+                () => resolve(true),
+                err => reject(err)
+            )
+            .index(indexName) // 索引对象
+            .openCursor(DBKeyRange); // 指针对象
+
+            request.onsuccess = event => {
+                const cursor = (event.target as any)?.result;
+                console.log('获取游标成功', cursor);
+                if (cursor) {
+                    const value = cursor.value;
+                    const putRequest = cursor.update({...value, ...data});
+                    putRequest.onerror = (err: any) => {
+                        console.log('通过游标修改数据失败', err);
+                    };
+                    putRequest.onsuccess = () => {
+                        console.log('通过游标修改数据成功');
+                    };
+                    cursor.continue();
+                }
+            };
+            request.onerror = event => {
+                console.log('获取游标失败', event);
+            };
+        });
+    }
+
+    /**
      * 根据主键删除数据
      * @param objectStoreName 对象存储名称
      * @param primaryKey 主键
@@ -251,6 +292,47 @@ export default class IndexedDbUtils {
             };
             request.onerror = event => {
                 console.log('数据删除失败', event);
+            };
+        });
+    }
+
+    /**
+     * 清空全部数据
+     * @param objectStoreName 对象存储名称
+     * @returns 
+     */
+    clear(objectStoreName: string) {
+        return new Promise((resolve, reject) => {
+            const request = this.openTransaction(
+                objectStoreName,
+                'readwrite',
+                () => resolve(true),
+                err => reject(err)
+            ).clear();
+
+            request.onsuccess = () => {
+                console.log('数据清除成功');
+            };
+            request.onerror = event => {
+                console.log('数据清除失败', event);
+            };
+        })
+    }
+
+    /**
+     * 删除数据看
+     * @returns 
+     */
+    deleteDB() {
+        const request = window.indexedDB.deleteDatabase(this.dbName);
+        return new Promise((resolve, reject) => {
+            request.onsuccess = () => {
+                console.log('删除数据库成功');
+                resolve(true);
+            };
+            request.onerror = event => {
+                console.log('删除数据库失败');
+                reject(event);
             };
         });
     }
