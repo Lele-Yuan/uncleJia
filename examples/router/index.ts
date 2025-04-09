@@ -46,6 +46,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'indexedDB',
     component: () => import(/* webpackChunkName: "indexedDB" */ 'views/indexedDB/Index.vue')
   },
+  {
+    path: '/zxingjs',
+    name: 'zxingjs',
+    component: () => import(/* webpackChunkName: "indexedDB" */ 'views/ZxingJs/Index.vue')
+  },
   // {
   //   path: '/about',
   //   name: 'About',

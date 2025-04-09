@@ -121,7 +121,7 @@
 	</div>
 </template>
 <script lang="ts" setup>
-import { computed, reactive, ref } from "vue-demi";
+import { computed, ref } from "vue";
 import cover from './cover.vue';
 const width = 25;
 const width0 = ref(width);

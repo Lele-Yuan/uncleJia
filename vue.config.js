@@ -16,8 +16,9 @@ const devConfig = {
     productionSourceMap: false,
     devServer: {
         port: 8088,
-        https: false,
-        disableHostCheck: true,
+        host: 'aaa.baidu.com',
+        https: true,
+        // disableHostCheck: true,
     },
     pages: {
         index: {

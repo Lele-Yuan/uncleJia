@@ -1,5 +1,6 @@
 import { searchItem } from './type'
 // const { Index, Document, Worker } = require("flexsearch");
+// @ts-ignore
 import FlexSearch from './flexSearch/webpack'
 
 export function filterQuery(dataList: searchItem[] , q: string, limit: number = 50){

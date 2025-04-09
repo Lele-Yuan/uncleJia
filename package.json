@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@unclejia/components": "^1.0.0",
-    "bi-vue-components": "^0.8.7",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
     "core-js": "^3.6.5",
     "dayjs": "^1.11.10",
     "easy-marker": "^1.1.23",

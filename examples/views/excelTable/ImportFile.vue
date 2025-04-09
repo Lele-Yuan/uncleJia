@@ -34,8 +34,7 @@
 <script lang="ts">
 import { defineComponent, reactive, toRefs } from 'vue';
 import { readExcel, downloadDialog, downloadWeight, loading } from './utils';
-import { ObjectKeys, SheetJsonData, SheetInfo } from './types';
-import { dataList } from '../AutoComplete/dataList';
+import { SheetJsonData, SheetInfo } from './types';
 import * as echarts from 'echarts';
 
 export default defineComponent({

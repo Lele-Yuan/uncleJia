@@ -11,8 +11,8 @@
 <div class="flex">
     <!-- <Sign />
     <Pie /> -->
-    <!-- <Ticket class="ticket-wrap" />
-    <Clock class="ticket-wrap" /> -->
+    <Ticket class="ticket-wrap" />
+    <Clock class="ticket-wrap" />
 </div>
 <!-- <div class="flex">
     <Exercise />
@@ -25,7 +25,6 @@ import Clock from "./Clock.vue";
 import Exercise from './Exercise.vue';
 import Pie from './Pie.vue';
 import html2canvas from 'html2canvas'
-import { onMounted } from "vue-demi";
 import { downloadUrl } from "../excelTable/utils";
 
 const saveScreen = () => {

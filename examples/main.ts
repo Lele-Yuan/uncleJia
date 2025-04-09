@@ -85,6 +85,7 @@ const components = [
 window.$message = ElMessage;
 window.$loading = ElLoading;
 
+// @ts-ignore
 import widget from '../packages'
 
 const instance = createApp(App).use(store).use(router).use(widget).use(UncleJia);

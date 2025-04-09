@@ -10,12 +10,21 @@
     <div class="container">
         <div class="btn-group">
             <el-button size="mini" type="warning" @click="handleClearJobs">清空全部任务</el-button>
-            <el-button size="mini" type="danger" @click="handleDeleteTable">删除数据库</el-button>
+            <el-button size="mini" type="danger" @click="handleDeleteDB">删除数据库</el-button>
         </div>
+        <el-checkbox
+            size="mini"
+            v-model="allState"
+            @change="getCompleteJob"
+        >
+            只看已完成
+        </el-checkbox>
         <el-input
             v-model="todo"
             size="mini"
             placeholder="请输入待办事项，回车确认"
+            @compositionstart="handleCompositionstart"
+            @compositionend="handleCompositionend"
             @keydown.enter="handleAddJob"
         />
         <div v-for="(item, index) in [todayJobs, historyJobs]" :key="index">
@@ -23,16 +32,16 @@
                 <span>{{ index === 0 ? '今日任务' : '历史任务' }}</span>
             </div>
             <div class="btn-group" v-if="item.length > 0 && index === 1">
-                <el-button size="mini" plain @click="handleCompleteHistory">完成历史任务</el-button>
+                <el-button size="mini" plain type="primary" @click="handleCompleteHistory">完成全部历史任务</el-button>
             </div>
             <div class="jobs" v-for="job in item" :key="job.id">
                 <el-checkbox
                     size="mini"
                     :id="job.id"
                     v-model="job.state"
-                    :true-label="STATUS.complete"
-                    :checked="job.state === STATUS.complete"
-                    :indeterminate="job.state === STATUS.reopen"
+                    :true-label="STATE.complete"
+                    :checked="job.state === STATE.complete"
+                    :indeterminate="job.state === STATE.reopen"
                     @change="value => handleCompleteJob(value, job)"
                 />
                 <el-input
@@ -41,9 +50,12 @@
                     v-model="editJob.title"
                     size="mini"
                     placeholder="请输入待办事项，回车确认"
+                    autofocus
+                    @compositionstart="handleCompositionstart"
+                    @compositionend="handleCompositionend"
                     @keydown.enter="() => handleChangeJob(job)"
                 />
-                <span class="item" :class="job.state === STATUS.complete && 'complete'" v-else :for="job.id">
+                <span class="item" :class="job.state === STATE.complete && 'complete'" v-else :for="job.id">
                     <div
                         class="title"
                         @dblclick="() => handleEditJob(job)"
@@ -53,8 +65,8 @@
                             <template #dropdown>
                                 <el-dropdown-menu>
                                     <el-dropdown-item @click="() => handleEditJob(job)">修改</el-dropdown-item>
-                                    <el-dropdown-item v-if="job.state !== STATUS.complete" @click="handleCompleteJob(true, job)">完成</el-dropdown-item>
-                                    <el-dropdown-item v-if="job.state === STATUS.complete" @click="handleCompleteJob(false, job)">重新打开</el-dropdown-item>
+                                    <el-dropdown-item v-if="job.state !== STATE.complete" @click="handleCompleteJob(true, job)">完成</el-dropdown-item>
+                                    <el-dropdown-item v-if="job.state === STATE.complete" @click="handleCompleteJob(false, job)">重新打开</el-dropdown-item>
                                     <el-dropdown-item divided @click="() => handleDeleteJob(job)">删除</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -74,23 +86,36 @@
 <script lang="ts" setup>
 import { Ref, reactive, ref } from "vue";
 import dayjs from "dayjs";
-import IndexedDbUtils, { IJob, STATUS } from "./dbUtils";
+import IndexedDbUtils, { IJob, STATE } from "./dbUtils";
 
 const dbRequest = new IndexedDbUtils({
     dbName: 'uncleJia',
     version: 1,
+    // version: 2, // TODO：1 升级版本号，会触发 onupgradeneeded 事件
+    // version: 1, // TODO：2 再降低回原来版本号，会触发 onerror 事件，无法使用
+    // TODO：3 默认表结构
     tables: [{
         name: 'jobs',
         primaryKey: 'id',
         indexs: [
-            // ['status', 'status'],
+            ['state', 'state'],
             ['createTime', 'createTime'],
         ]
+    }, {
+        name: 'test_v1',
+        // primaryKey: 'id',
+        // indexs: [
+        //     ['state', 'state'],
+        // ]
     }],
 });
+// TODO: 查询数据
+dbRequest.dbOpeningPromise?.then(() => {
+    getAllJobs();
+})
 
 const todo = ref('');
-const handleDeleteTable = async () => {
+const handleDeleteDB = async () => {
     const result = await dbRequest.deleteDB();
     if (result) {
         historyJobs.value = [];
@@ -109,25 +134,16 @@ const handleCompleteHistory = async () => {
         'createTime',
         [new Date('2022-01-01').getTime(), new Date(today).getTime()],
         // 1701418747360,
-        {state: STATUS.complete}
+        {state: STATE.complete}
     );
     if (result) {
         getAllJobs();
     }
 }
-const handleCompleteJob = async (value: boolean, job: IJob) => {
-    const state = value ? STATUS.complete : STATUS.reopen;
-    console.log('state: ', state);
-    const result = await dbRequest.put('jobs', {
-        ...job,
-        state,
-    })
-
-    if (result) {
-        getAllJobs();
-    }
-}
 const handleAddJob = async () => {
+    if (isInputZh.value) {
+        return;
+    }
     if (!todo.value) {
         window.$message({
             type: 'error',
@@ -138,10 +154,10 @@ const handleAddJob = async () => {
     const createTime = new Date().getTime();
     const result = await dbRequest.add('jobs', {
         id: createTime.toString(),
-        // id: "1701085558270",
         title: todo.value,
-        state: STATUS.start,
+        state: STATE.start,
         createTime,
+        // createTime: 1709006400000,
     } as IJob);
 
     if (result) {
@@ -149,7 +165,18 @@ const handleAddJob = async () => {
         getAllJobs();
     }
 }
+const handleCompleteJob = async (value: boolean, job: IJob) => {
+    const state = value ? STATE.complete : STATE.reopen;
+    console.log('state: ', state);
+    const result = await dbRequest.put('jobs', {
+        ...job,
+        state,
+    })
 
+    if (result) {
+        getAllJobs();
+    }
+}
 const editJob = reactive({
     id: '',
     title: '',
@@ -166,6 +193,9 @@ const handleDeleteJob = async (job: IJob) => {
     }
 }
 const handleChangeJob = async (job: IJob) => {
+    if (isInputZh.value) {
+        return;
+    }
     const result = await dbRequest.put('jobs', {
         ...job,
         title: editJob.title,
@@ -184,7 +214,7 @@ const handleRepetition = () => {
     const job = {
         id: createTime.toString(),
         title: '测试重复主键',
-        state: STATUS.start,
+        state: STATE.start,
         createTime,
     } as IJob;
     dbRequest.add('jobs', [job, job]);
@@ -192,23 +222,46 @@ const handleRepetition = () => {
 
 let historyJobs: Ref<IJob[]> = ref([]);
 let todayJobs: Ref<IJob[]> = ref([]);
+
+const filterAllJobs = (jobs: IJob[]) => {
+    const totalJobs = jobs.sort(job => job.createTime);
+    todayJobs.value = totalJobs.filter(job => (
+        dayjs(job.createTime).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
+    ));
+    historyJobs.value = jobs.filter(job => (
+        dayjs(job.createTime).format('YYYY-MM-DD') !== dayjs().format('YYYY-MM-DD')
+    ));
+}
 const getAllJobs = async () => {
     dbRequest.getAllData('jobs').then(result => {
         if (result) {
-            const totalJobs = result.sort(job => job.createTime);
-            todayJobs.value = totalJobs.filter(job => (
-                dayjs(job.createTime).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
-            ));
-            historyJobs.value = result.filter(job => (
-                dayjs(job.createTime).format('YYYY-MM-DD') !== dayjs().format('YYYY-MM-DD')
-            ));
-            console.log('historyJobs: ', dayjs().format('YYYY-MM-DD'), totalJobs, todayJobs.value, historyJobs.value);
+            filterAllJobs(result);
+            console.log('historyJobs: ', dayjs().format('YYYY-MM-DD'), result, todayJobs.value, historyJobs.value);
         }
     });
 }
-dbRequest.dbOpeningPromise?.then(() => {
-    getAllJobs();
-})
+
+const allState = ref(false);
+const getCompleteJob = async (value: boolean) => {
+    if (value) {
+        dbRequest.getByIndex('jobs', 'state', STATE.complete).then(result => {
+            filterAllJobs(result);
+            console.log('result: ', result);
+        })
+    } else {
+        getAllJobs()
+    }
+};
+
+const isInputZh = ref(false);
+const handleCompositionstart = () => {
+    isInputZh.value = true;
+    console.log('isInputZh.value: ', isInputZh.value);
+};
+const handleCompositionend = () => {
+    isInputZh.value = false;
+    console.log('isInputZh.value: ', isInputZh.value);
+};
 </script>
 
 <style lang="less" scoped>
@@ -284,6 +337,12 @@ dbRequest.dbOpeningPromise?.then(() => {
             font-size: 12px;
             color: #878D99;
         }
+    }
+
+    :deep(.el-input__inner) {
+        padding-left: 4px;
+        margin-left: 8px;
+        border: none;
     }
 }
 

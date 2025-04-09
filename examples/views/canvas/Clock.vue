@@ -2,7 +2,7 @@
 <canvas id="clockCanvas" width="400" height="200"></canvas>
 </template>
 <script lang="ts" setup>
-import { onMounted } from "vue-demi";
+import { onMounted } from "vue";
 
 let canvas = null as any, ctx = null as any;
 const oneCircle = 2 * Math.PI;
