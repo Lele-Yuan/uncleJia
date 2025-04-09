@@ -5,15 +5,15 @@ type TIndex = [TiIndexName, TKeyPath];
 interface IOptions {
     version: number; // 版本
     dbName: string; // 数据库的名字
-    tables: IObjectStore[]; // 数据对象列表
+    tables?: IObjectStore[]; // 数据对象列表
 }
 interface IObjectStore {
     name: string;
-    primaryKey: string;
-    indexs: TIndex[];
+    primaryKey?: string;
+    indexs?: TIndex[];
 }
 
-export enum STATUS {
+export enum STATE {
     start,
     reopen,
     complete,
@@ -22,7 +22,7 @@ export enum STATUS {
 export interface IJob {
     id: string;
     title: string;
-    state: STATUS;
+    state: STATE;
     createTime: number;
     updateTime?: number;
 }
@@ -61,33 +61,37 @@ export default class IndexedDbUtils {
                 console.log(errorMsg);
                 reject(new Error(errorMsg));
             }
-    
-            const DBOpenRequest = window.indexedDB.open(dbName, version);
+
+            const DBOpenRequest = window.indexedDB.open(this.dbName, this.version);
+            console.log('open数据库', DBOpenRequest.readyState);
             
             DBOpenRequest.onsuccess = () => {
                 this.dbIstance = DBOpenRequest.result; // 数据库对象
-                console.log('数据库打开成功');
+                console.log('数据库打开成功', DBOpenRequest.readyState);
                 resolve(this.dbIstance);
             };
-    
+
             DBOpenRequest.onerror = error => {
-                console.log('数据库打开失败');
+                console.log('数据库打开失败', DBOpenRequest.readyState);
                 reject(error);
             };
-    
+
             // 首次创建或者版本变更（更高版本）
             DBOpenRequest.onupgradeneeded = event => {
                 // 缓存数据库实例
                 this.dbIstance = DBOpenRequest.result;
-                console.log('数据库新建或版本升级中');
+                console.log('数据库新建或版本升级中', DBOpenRequest.readyState);
                 console.log('旧版本为：', event.oldVersion);
-    
+
                 this.dbIstance.onerror = event => console.log('数据库打开失败', event);
-    
+
                 this.dbIstance.onversionchange = () => console.log('数据库版本变更');
-    
+
                 this.createTable(this.tables);
-                
+
+                if (event.oldVersion > 0 && event.oldVersion < 2) {
+                    this.dbIstance?.deleteObjectStore('test_v1');
+                }
             }
         })
     }
@@ -114,8 +118,8 @@ export default class IndexedDbUtils {
      * @param objectStore 数据对象
      * @param index {indexName: string, keyPath: string}[]
      */
-    createIndex(objectStore: IDBObjectStore, index: TIndex[]) {
-        index.forEach(index => {
+    createIndex(objectStore: IDBObjectStore, index?: TIndex[]) {
+        index?.forEach(index => {
             objectStore.createIndex(...index);
         })
     }
@@ -265,6 +269,39 @@ export default class IndexedDbUtils {
                         console.log('通过游标修改数据成功');
                     };
                     cursor.continue();
+                }
+            };
+            request.onerror = event => {
+                console.log('获取游标失败', event);
+            };
+        });
+    }
+
+
+    /**
+     * 根据索引获取数据
+     */
+    getByIndex(objectStoreName: string, indexName: string, indexValue: any): Promise<any[]>  {
+        return new Promise((resolve, reject) => {
+            const request = this.openTransaction(
+                objectStoreName,
+                'readonly',
+                () => resolve([]),
+                err => reject(err)
+            )
+            .index(indexName) // 索引对象
+            // .get(indexValue) // 索引值
+            .openCursor(IDBKeyRange.only(indexValue)); // 指定索引值
+
+            const results: any[] = [];
+            request.onsuccess = event => {
+                const cursor = (event.target as any)?.result;
+                console.log('获取游标成功', cursor);
+                if (cursor) {
+                    results.push(cursor.value);
+                    cursor.continue();
+                } else {
+                    resolve(results);
                 }
             };
             request.onerror = event => {
